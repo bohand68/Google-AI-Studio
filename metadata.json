@@ -1,0 +1,6 @@
+{
+  "name": "SAP S/4HANA Estimation Tool",
+  "description": "Effort estimation tool for SAP S/4HANA Public Cloud implementation projects based on SAP Activate.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

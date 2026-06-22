@@ -75,6 +75,20 @@ export function TeamAndCosts() {
   const steeringFactor = t.steeringFactor || 0;
   const multiplier = 1 + ((complexityFactor + steeringFactor) / 100);
 
+  const selectedCurrency = t.currency || 'EUR';
+  const exchangeRates = t.exchangeRates || { USD: 1.05, CNY: 7.7, GBP: 0.85 };
+
+  const getExchangeRate = () => {
+    if (selectedCurrency === 'EUR') return 1;
+    return exchangeRates[selectedCurrency] || 1;
+  };
+
+  const formatCurrency = (val: number) => {
+    const rate = getExchangeRate();
+    const converted = val * rate;
+    return new Intl.NumberFormat('de-DE', { style: 'currency', currency: selectedCurrency }).format(converted);
+  };
+
   const getRoleCalculatedDays = (code: string) => {
     let days = baseDays * ((rolePercent[code] || 0) / 100);
     if (code === 'PL-BPC') {
@@ -200,6 +214,55 @@ export function TeamAndCosts() {
               </div>
             </div>
 
+        {/* Currency Selector */}
+        <div className="w-full bg-slate-50 ring-1 ring-slate-200 rounded-lg p-5">
+           <h4 className="text-sm font-medium text-gray-900 mb-4 border-b border-gray-200 pb-2">Währung & Wechselkurse</h4>
+           <div className="flex flex-col md:flex-row gap-6">
+             <div className="w-full md:w-1/3">
+                <Label>Währung auswählen</Label>
+                <select 
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 ring-1 ring-inset ring-gray-300"
+                  value={selectedCurrency}
+                  onChange={e => handleUpdate({ currency: e.target.value })}
+                >
+                  <option value="EUR">Euro (EUR) - Basis</option>
+                  <option value="USD">US Dollar (USD)</option>
+                  <option value="CNY">Chinesische Yuan (CNY)</option>
+                  <option value="GBP">Britische Pfund (GBP)</option>
+                </select>
+             </div>
+             
+             {selectedCurrency !== 'EUR' && (
+               <div className="w-full md:w-2/3 grid grid-cols-1 md:grid-cols-3 gap-4">
+                 <div>
+                   <Label>Kurs EUR zu USD</Label>
+                   <Input 
+                      type="number" step="0.01" 
+                      value={exchangeRates.USD || 1.05} 
+                      onChange={e => handleUpdate({ exchangeRates: { ...exchangeRates, USD: parseFloat(e.target.value) || 0 } })} 
+                    />
+                 </div>
+                 <div>
+                   <Label>Kurs EUR zu CNY</Label>
+                   <Input 
+                      type="number" step="0.01" 
+                      value={exchangeRates.CNY || 7.7} 
+                      onChange={e => handleUpdate({ exchangeRates: { ...exchangeRates, CNY: parseFloat(e.target.value) || 0 } })} 
+                    />
+                 </div>
+                 <div>
+                   <Label>Kurs EUR zu GBP</Label>
+                   <Input 
+                      type="number" step="0.01" 
+                      value={exchangeRates.GBP || 0.85} 
+                      onChange={e => handleUpdate({ exchangeRates: { ...exchangeRates, GBP: parseFloat(e.target.value) || 0 } })} 
+                    />
+                 </div>
+               </div>
+             )}
+           </div>
+        </div>
+
         {/* Daily Rates & Distribution */}
         <div className="w-full">
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 border-b pb-3 gap-3">
@@ -233,7 +296,7 @@ export function TeamAndCosts() {
                       <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Berechnete Tage</th>
                       <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase leading-tight">Run+Hypercare<br/>(Manuell)</th>
                       <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase leading-tight">Rest-Tage<br/>(Manuell)</th>
-                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Kosten (€)</th>
+                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Kosten ({selectedCurrency})</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-200 bg-white">
@@ -247,12 +310,19 @@ export function TeamAndCosts() {
                       <tr key={code}>
                         <td className="px-3 py-1.5 text-sm text-gray-900 font-mono">{code}</td>
                         <td className="px-3 py-1.5">
-                           <Input 
-                             type="number" 
-                             className="w-24" 
-                             value={t.dailyRates[code] || 0} 
-                             onChange={e => handleRateUpdate(code, parseFloat(e.target.value) || 0)} 
-                            />
+                          <div className="flex items-center space-x-2">
+                            <Input 
+                              type="number" 
+                              className="w-24" 
+                              value={t.dailyRates[code] || 0} 
+                              onChange={e => handleRateUpdate(code, parseFloat(e.target.value) || 0)} 
+                             />
+                            {selectedCurrency !== 'EUR' && (
+                              <span className="text-sm font-medium text-indigo-700 whitespace-nowrap bg-indigo-50 px-2 py-1 rounded">
+                                {formatCurrency(t.dailyRates[code] || 0)}
+                              </span>
+                            )}
+                          </div>
                         </td>
                         <td className="px-3 py-1.5">
                            <Input 
@@ -291,7 +361,7 @@ export function TeamAndCosts() {
                             />
                         </td>
                         <td className="px-3 py-1.5 text-sm text-gray-900 font-medium whitespace-nowrap">
-                          {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(cost)}
+                          {formatCurrency(cost)}
                         </td>
                       </tr>
                     )})}
@@ -303,7 +373,7 @@ export function TeamAndCosts() {
                        <td className="px-3 py-2 text-sm font-bold text-gray-600">{totalCalculatedDays.toFixed(1)}</td>
                        <td className="px-3 py-2 text-sm font-bold text-green-700">{Object.values(t.runHypercareDays || {}).reduce((a,b)=>a+(b||0),0).toFixed(1)}</td>
                        <td className="px-3 py-2 text-sm font-bold text-indigo-700">{totalAssignedDays.toFixed(1)}</td>
-                       <td className="px-3 py-2 text-sm font-bold text-indigo-700">{new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(totalProjectCost)}</td>
+                       <td className="px-3 py-2 text-sm font-bold text-indigo-700">{formatCurrency(totalProjectCost)}</td>
                      </tr>
                   </tfoot>
                 </table>
@@ -344,7 +414,7 @@ export function TeamAndCosts() {
                  <div className="md:col-span-2 flex justify-between items-end pt-4">
                    <span className="text-xl text-indigo-900 font-black">Indikative Projektkosten</span>
                    <span className="text-2xl font-black text-indigo-600">
-                     {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(totalProjectCost)}
+                     {formatCurrency(totalProjectCost)}
                    </span>
                  </div>
                </div>

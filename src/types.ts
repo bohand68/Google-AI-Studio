@@ -34,9 +34,13 @@ export interface TeamAndCostsState {
   meetingDaysPerWeek: number;
   complexityFactor?: number;
   steeringFactor?: number;
+  currency?: string;
+  exchangeRates?: Record<string, number>;
 }
 
 export interface AppState {
+  language: string;
+  ddaExport: any[][];
   projectDuration: ProjectDurationState;
   scopeItems: ScopeItemsState;
   dataMigration: GenericEstimationState;

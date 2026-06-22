@@ -5,10 +5,14 @@ import { Card, CardHeader, CardContent } from './ui';
 import { BarChartHorizontal } from 'lucide-react';
 import { PHASES, PHASE_COLORS } from '../constants';
 import { Phase } from '../types';
+import { translations, Language, TranslationKey } from '../i18n';
 
 export function ProjectTimeline() {
   const { state } = useAppContext();
-  const { projectDuration: d, scopeItems: s, dataMigration: dm, integrations: int, forms: fm, teamAndCosts: tc } = state;
+  const { projectDuration: d, scopeItems: s, dataMigration: dm, integrations: int, forms: fm, teamAndCosts: tc, language } = state;
+
+  const lang = (language || 'de') as Language;
+  const t = (key: TranslationKey) => translations[lang]?.[key] || translations['de'][key] || key;
 
   const data = useMemo(() => {
     let sLow = 0, sMedium = 0, sHigh = 0, sVeryHigh = 0;
@@ -133,9 +137,9 @@ export function ProjectTimeline() {
   return (
     <Card>
       <CardHeader 
-        title="Projekt-Zeitplan & Aufwand (Gantt)" 
+        title={t('timeline.title')} 
         icon={BarChartHorizontal} 
-        description="Visuelle Darstellung der Projektphasen in Wochen inkl. der aufgelaufenen kalkulierten Aufwände in Tagen." 
+        description={t('timeline.desc')} 
       />
       <CardContent>
         <div className="h-[360px] w-full pt-4">

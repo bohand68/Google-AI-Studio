@@ -21,6 +21,8 @@ export const PHASE_COLORS = {
 };
 
 export const INITIAL_STATE: AppState = {
+  language: 'de',
+  ddaExport: [],
   projectDuration: {
     startDate: '',
     endDate: '',
@@ -163,6 +165,12 @@ export const INITIAL_STATE: AppState = {
     meetingPersons: 1,
     meetingDaysPerWeek: 0.125,
     complexityFactor: 0,
-    steeringFactor: 0
+    steeringFactor: 0,
+    currency: 'EUR',
+    exchangeRates: {
+      USD: 1.05,
+      CNY: 7.7,
+      GBP: 0.85
+    }
   }
 };

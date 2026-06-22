@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { AppProvider } from './store';
+import { AppProvider, useAppContext } from './store';
 import { ProjectDuration } from './components/ProjectDuration';
 import { ProjectTimeline } from './components/ProjectTimeline';
 import { ScopeItems } from './components/ScopeItems';
@@ -8,23 +8,29 @@ import { TeamAndCosts } from './components/TeamAndCosts';
 import { Rasci } from './components/Rasci';
 import { ScenarioManager } from './components/ScenarioManager';
 import { ProjectSummary } from './components/ProjectSummary';
+import { DDAExport } from './components/DDAExport';
 import { Database, Link, FileText, Calculator } from 'lucide-react';
+import { translations, Language, TranslationKey } from './i18n';
 
 const TABS = [
-  { id: 'duration', label: '1. Projektlaufzeit' },
-  { id: 'scope', label: '2. BPC Scope' },
-  { id: 'data', label: '3. Daten' },
-  { id: 'integration', label: '4. Integration' },
-  { id: 'forms', label: '5. Formulare' },
-  { id: 'rasci', label: '6. RASCI' },
-  { id: 'team', label: '7. Team & Kosten' },
-  { id: 'summary', label: '8. Übersicht' },
+  { id: 'dda', labelKey: 'tab.dda' },
+  { id: 'duration', labelKey: 'tab.duration' },
+  { id: 'scope', labelKey: 'tab.scope' },
+  { id: 'data', labelKey: 'tab.data' },
+  { id: 'integration', labelKey: 'tab.integration' },
+  { id: 'forms', labelKey: 'tab.forms' },
+  { id: 'rasci', labelKey: 'tab.rasci' },
+  { id: 'team', labelKey: 'tab.team' },
+  { id: 'summary', labelKey: 'tab.summary' },
 ] as const;
 
 type TabId = typeof TABS[number]['id'];
 
 function Dashboard() {
   const [activeTab, setActiveTab] = useState<TabId>('duration');
+  const { state } = useAppContext();
+  const lang = (state.language || 'de') as Language;
+  const t = (key: TranslationKey) => translations[lang]?.[key] || translations['de'][key] || key;
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 pb-20 font-sans">
@@ -34,8 +40,8 @@ function Dashboard() {
             <div className="w-9 h-9 rounded-xl bg-indigo-600 shadow-md shadow-indigo-600/20 flex items-center justify-center">
                <Calculator className="w-5 h-5 text-white" />
             </div>
-            <h1 className="text-xl font-bold tracking-tight text-slate-900 hidden md:block">SAP S/4HANA Public Cloud Presales Estimation</h1>
-            <h1 className="text-xl font-bold tracking-tight text-slate-900 md:hidden">S/4HANA Kalkulator</h1>
+            <h1 className="text-xl font-bold tracking-tight text-slate-900 hidden md:block">{t('app.title')}</h1>
+            <h1 className="text-xl font-bold tracking-tight text-slate-900 md:hidden">{t('app.titleShort')}</h1>
           </div>
           <ScenarioManager />
         </div>
@@ -51,7 +57,7 @@ function Dashboard() {
                     : 'bg-transparent text-slate-600 hover:bg-slate-100 hover:text-slate-900'
                 }`}
               >
-                {tab.label}
+                {t(tab.labelKey as TranslationKey)}
               </button>
             ))}
           </div>
@@ -59,6 +65,8 @@ function Dashboard() {
       </header>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+        {activeTab === 'dda' && <DDAExport />}
+        
         {activeTab === 'duration' && (
           <>
             <ProjectDuration />

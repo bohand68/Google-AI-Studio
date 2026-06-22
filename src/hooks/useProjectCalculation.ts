@@ -39,6 +39,8 @@ export function useProjectCalculation() {
     let overallPmDays = 0;
     let overallMeetingDays = 0;
 
+    let streamTotals = { scope: 0, dm: 0, integration: 0, forms: 0, pm: 0 };
+
     let currentStart = 0;
 
     const phaseData = PHASES.filter(p => !(p === 'Discover' && (d.phaseDistributions[p] || 0) === 0)).map(phase => {
@@ -61,6 +63,12 @@ export function useProjectCalculation() {
         overallBaseDays += baseDays;
         overallPmDays += pmDays;
         overallMeetingDays += meetingDays;
+
+        streamTotals.scope += scopeDays;
+        streamTotals.dm += dmDays;
+        streamTotals.integration += intDays;
+        streamTotals.forms += fMDays;
+        streamTotals.pm += pmDays + meetingDays;
 
         const start = currentStart;
         const end = currentStart + wks;
@@ -148,6 +156,6 @@ export function useProjectCalculation() {
        grandTotalEuro += row.totalEuro;
     });
 
-    return { phaseData, roleTable, phaseTotals, grandTotalBT, grandTotalEuro };
+    return { phaseData, roleTable, phaseTotals, grandTotalBT, grandTotalEuro, streamTotals };
   }, [s, dm, int, fm, tc, d]);
 }
